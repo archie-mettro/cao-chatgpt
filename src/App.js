@@ -18,6 +18,28 @@ const App = () => {
     setValue("")
   }
 
+  const preLoadMessage = async () => {
+    let site_url = "http://localhost:8000" //"https://cao-api.onrender.com"
+    const options = {
+      method: "POST",
+      body: JSON.stringify({
+        message: 'Welcome to Carpet One Stafford! How can I help you today?',
+        role: 'assistant'
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+    try{
+      const response = await fetch( site_url + '/completions', options)
+      const data = await response.json()
+      setMessage(data.choices[0].message)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+
   const getMessages = async () => {
     let site_url = "https://cao-api.onrender.com"
     const options = {
@@ -76,6 +98,8 @@ const App = () => {
         ]
       ))
     }
+
+
   }, [message, currentTitle])
 
   console.log(previousChats)
@@ -84,7 +108,7 @@ const App = () => {
  
   const uniqueTitles = Array.from(new Set(previousChats.map(previousChat => previousChat.title)))
 
-  //console.log(uniqueTitles)
+  
 
   return (
     <div className="app">
@@ -98,8 +122,9 @@ const App = () => {
           </nav>
       </section>
       <section className="main">
-        {!currentTitle && <h2>Carpet One ChatGPT</h2>}
+        {/* {!currentTitle && <h3>Welcome to Carpet One Stafford! How can I help you today?</h3>} */}
         <ul className="feed">
+          <li><p class="role">assistant</p><p>Welcome to Carpet One Stafford! How can I help you today?</p></li>
           {currentChat.map((chatMessage, index) => <li key={index}>
             <p className="role">{chatMessage.role}</p>
             <p>{chatMessage.content}</p>
@@ -107,9 +132,8 @@ const App = () => {
         </ul>
         <div className="bottom-section">
           <div className="input-container">
-              <div></div>
 
-              <input value={value} onChange={(e) => setValue(e.target.value)} />
+              <input  value={value} onChange={(e) => setValue(e.target.value)} />
               <div id="submit" onClick={getMessages}>Send</div>
 
               {/* <form onSubmit={handleSubmit}>
