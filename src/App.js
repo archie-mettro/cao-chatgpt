@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 
 
 const App = () => {
-  let API_SITE_URL = 'https://cao-chat-system.onrender.com:8000'
-
   const [ value, setValue ] = useState(null)
   const [ message, setMessage] = useState(null)
   const [ previousChats, setPreviousChats ] = useState([])
@@ -20,28 +18,8 @@ const App = () => {
     setValue("")
   }
 
-  const preLoadMessage = async () => {
-    const options = {
-      method: "POST",
-      body: JSON.stringify({
-        message: "Welcome to Carpet One Stafford! How can I help you today?",
-        role: 'assistant'
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-    try{
-      const response = await fetch(API_SITE_URL + '/completions', options)
-      const data = await response.json()
-      setMessage(data.choices[0].message)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-
   const getMessages = async () => {
+    let site_url = "https://cao-api.onrender.com"
     const options = {
       method: "POST",
       body: JSON.stringify({
@@ -52,14 +30,15 @@ const App = () => {
       }
     }
     try{
-      const response = await fetch(API_SITE_URL + '/completions', options)
+      const response = await fetch( site_url + '/completions', options)
       const data = await response.json()
       setMessage(data.choices[0].message)
-      
     } catch (error) {
       console.error(error)
     }
   }
+
+  
 
   // const handleSubmit = (e) => {
   //   e.preventDefault();
@@ -105,7 +84,7 @@ const App = () => {
  
   const uniqueTitles = Array.from(new Set(previousChats.map(previousChat => previousChat.title)))
 
-  //console.log(process.env.SITE_)
+  //console.log(uniqueTitles)
 
   return (
     <div className="app">
@@ -128,7 +107,7 @@ const App = () => {
         </ul>
         <div className="bottom-section">
           <div className="input-container">
-             
+              <div></div>
 
               <input value={value} onChange={(e) => setValue(e.target.value)} />
               <div id="submit" onClick={getMessages}>Send</div>
