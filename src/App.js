@@ -22,7 +22,7 @@ const App = () => {
     const options = {
       method: "POST",
       body: JSON.stringify({
-        message: value,
+        message: "Welcome to Carpet One Stafford! How can I help you today?",
         role: 'assistant'
       }),
       headers: {
@@ -50,7 +50,7 @@ const App = () => {
       }
     }
     try{
-      const response = await fetch('http://localhost:8000/completions', options)
+      const response = await fetch(process.env.SITE_URL + '/completions', options)
       const data = await response.json()
       setMessage(data.choices[0].message)
       
