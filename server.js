@@ -44,6 +44,10 @@ app.post('/', async (req, res) => {
 
 
 app.post('/completions', async (req, res) => {
+    let role = req.body.role
+    if(req.body.role === undefined){
+        role = "user"
+    }
     const options = {
         method: "POST",
         headers: {
@@ -52,7 +56,7 @@ app.post('/completions', async (req, res) => {
         },
         body: JSON.stringify({
             model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: "This is related content for Carpet One Stafford, Australia website, " + req.body.message }],
+            messages: [{ role: role, content: "This is related content for Carpet One Stafford, Australia, " + req.body.message }],
             max_tokens: 100,
         })
     }
