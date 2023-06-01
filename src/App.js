@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-
+import typingImage from './typing-texting.gif'
 
 const App = () => {
   const [ value, setValue ] = useState(null)
   const [ message, setMessage] = useState(null)
+  const [ inputValue, setInputValue] = useState(null)
   const [ previousChats, setPreviousChats ] = useState([])
   const [ currentTitle, setCurrentTitle ] = useState(null)
+  const typingImageUrl = typingImage
   const createNewChat = () => {
     setMessage(null)
     setValue("")
@@ -42,6 +44,8 @@ const App = () => {
 
   const getMessages = async () => {
     let site_url = "https://cao-api.onrender.com"
+    setInputValue("Sent")
+    //setInputValue("<li><p class='role'>user</p><p>" + value + "</p><br /></li><li><p class='role'>assistant</p><p><img src='"+typingImage+"' /></p></li>")
     const options = {
       method: "POST",
       body: JSON.stringify({
@@ -53,8 +57,10 @@ const App = () => {
     }
     try{
       const response = await fetch( site_url + '/completions', options)
+      
       const data = await response.json()
       setMessage(data.choices[0].message)
+      setInputValue(null)
     } catch (error) {
       console.error(error)
     }
@@ -129,6 +135,12 @@ const App = () => {
             <p className="role">{chatMessage.role}</p>
             <p>{chatMessage.content}</p>
            </li>)}
+           {/* <div dangerouslySetInnerHTML={{ __html: inputValue }}>
+            </div> */}
+            
+            {inputValue == "Sent" && (<li><p className="role">user</p><p>{value}</p></li>)}
+            {inputValue == "Sent" && (<li className='assistant-wrapper'><p className="role">assistant</p><p className='loading-wrapper'><img className="typing-image" src={typingImageUrl} /></p></li>)}
+            
         </ul>
         <div className="bottom-section">
           <div className="input-container">
