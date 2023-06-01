@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 
 
 const App = () => {
+  let API_SITE_URL = 'https://cao-chat-system.onrender.com:8000'
+
   const [ value, setValue ] = useState(null)
   const [ message, setMessage] = useState(null)
   const [ previousChats, setPreviousChats ] = useState([])
@@ -30,7 +32,7 @@ const App = () => {
       }
     }
     try{
-      const response = await fetch(process.env.SITE_URL + '/completions', options)
+      const response = await fetch(API_SITE_URL + '/completions', options)
       const data = await response.json()
       setMessage(data.choices[0].message)
     } catch (error) {
@@ -50,7 +52,7 @@ const App = () => {
       }
     }
     try{
-      const response = await fetch(process.env.SITE_URL + '/completions', options)
+      const response = await fetch(API_SITE_URL + '/completions', options)
       const data = await response.json()
       setMessage(data.choices[0].message)
       
@@ -103,7 +105,7 @@ const App = () => {
  
   const uniqueTitles = Array.from(new Set(previousChats.map(previousChat => previousChat.title)))
 
-  //console.log(uniqueTitles)
+  //console.log(process.env.SITE_)
 
   return (
     <div className="app">
