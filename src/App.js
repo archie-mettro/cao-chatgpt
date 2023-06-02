@@ -4,13 +4,15 @@ import typingImage from './typing-texting.gif'
 const App = () => {
   const [ value, setValue ] = useState(null)
   const [ message, setMessage] = useState(null)
-  const [ inputValue, setInputValue] = useState(null)
+  const [ isSent, setIsSent] = useState(0)
+  const [ paramValue, setParamValue] = useState(null)
   const [ previousChats, setPreviousChats ] = useState([])
   const [ currentTitle, setCurrentTitle ] = useState(null)
   const typingImageUrl = typingImage
   const createNewChat = () => {
     setMessage(null)
     setValue("")
+    setParamValue("")
     setCurrentTitle(null)
   }
 
@@ -18,38 +20,23 @@ const App = () => {
     setCurrentTitle(uniqueTitle)
     setMessage(null)
     setValue("")
+    setParamValue("")
   }
-
-  const preLoadMessage = async () => {
-    let site_url = "http://localhost:8000" //"https://cao-api.onrender.com"
-    const options = {
-      method: "POST",
-      body: JSON.stringify({
-        message: 'Welcome to Carpet One Stafford! How can I help you today?',
-        role: 'assistant'
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-    try{
-      const response = await fetch( site_url + '/completions', options)
-      const data = await response.json()
-      setMessage(data.choices[0].message)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
 
   const getMessages = async () => {
     let site_url = "https://cao-api.onrender.com"
-    setInputValue("Sent")
-    //setInputValue("<li><p class='role'>user</p><p>" + value + "</p><br /></li><li><p class='role'>assistant</p><p><img src='"+typingImage+"' /></p></li>")
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === ""){
+      site_url = "http://localhost:8000"
+    }
+
+
+    setIsSent(1)
+    setParamValue(value)
+    setValue("")
     const options = {
       method: "POST",
       body: JSON.stringify({
-        message: value,
+        message: paramValue,
       }),
       headers: {
         "Content-Type": "application/json"
@@ -60,41 +47,24 @@ const App = () => {
       
       const data = await response.json()
       setMessage(data.choices[0].message)
-      setInputValue(null)
+      setIsSent(0)
     } catch (error) {
       console.error(error)
     }
   }
 
-  
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   fetch('http://localhost:8000', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({message}),
-  //   })
-  //   .then((res) => res.json())
-  //   .then((data) => setResponse(data.message))
-  // }
-
-
-
   useEffect(() => {
-    console.log(currentTitle, value, message)
-    if (!currentTitle && value && message){
-      setCurrentTitle(value)
+    console.log(currentTitle, paramValue, message)
+    if (!currentTitle && paramValue && message){
+      setCurrentTitle(paramValue)
     }
-    if(currentTitle && value && message){
+    if(currentTitle && paramValue && message){
       setPreviousChats(prevChats => (
         [...prevChats,
           {
             title: currentTitle,
             role: "user",
-            content: value
+            content: paramValue
           },
           {
             title: currentTitle,
@@ -108,7 +78,6 @@ const App = () => {
 
   }, [message, currentTitle])
 
-  console.log(previousChats)
 
   const currentChat = previousChats.filter(previousChat => previousChat.title === currentTitle)
  
@@ -135,11 +104,10 @@ const App = () => {
             <p className="role">{chatMessage.role}</p>
             <p>{chatMessage.content}</p>
            </li>)}
-           {/* <div dangerouslySetInnerHTML={{ __html: inputValue }}>
-            </div> */}
+
             
-            {inputValue == "Sent" && (<li><p className="role">user</p><p>{value}</p></li>)}
-            {inputValue == "Sent" && (<li className='assistant-wrapper'><p className="role">assistant</p><p className='loading-wrapper'><img className="typing-image" src={typingImageUrl} /></p></li>)}
+            {isSent == 1 && (<li><p className="role">user</p><p>{paramValue}</p></li>)}
+            {isSent == 1 && (<li className='assistant-wrapper'><p className="role">assistant</p><p className='loading-wrapper'><img className="typing-image" src={typingImageUrl} /></p></li>)}
             
         </ul>
         <div className="bottom-section">
@@ -147,11 +115,6 @@ const App = () => {
 
               <input  value={value} onChange={(e) => setValue(e.target.value)} />
               <div id="submit" onClick={getMessages}>Send</div>
-
-              {/* <form onSubmit={handleSubmit}>
-                <textarea value={message} onChange={(e) => setMessage(e.target.value)}></textarea>
-                <button type="submit">Submit</button>
-              </form> */}
           </div>
           <p className="info">
           Carla, our virtual assistant, is a work in progress, but she is always learning and improving. We appreciate your patience as Carla continues to learn and grow.
