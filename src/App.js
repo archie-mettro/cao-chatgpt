@@ -49,7 +49,7 @@ const App = () => {
   }
 
   const getMessages = async () => {
-    let site_url = "https://cao-api.onrender.com"
+    let site_url = "https://cao-web-api.onrender.com"
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === ""){
       site_url = "http://localhost:8000"
     }
