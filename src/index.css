@@ -110,7 +110,7 @@ input:focus{
   margin: 20px 0;
 }
 
-.feed p{
+.feed p, .feed pre{
   color: rgba(255,255,255, 0.8);
   font-size: 14px;
   text-align: left;

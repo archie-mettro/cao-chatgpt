@@ -1,26 +1,51 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import typingImage from './typing-texting.gif'
+
+
+const ChatMessage = ({ message }) => {
+  return (
+    <p style={{ whiteSpace: 'pre-line' }}>{replaceProductInfoWithImages(message)}</p>
+  )
+}
+
+function replaceProductInfoWithImages(text) {
+  const productNameRegex = /Products Name: (.+)/g;
+  const productImageRegex = /Product Image: (.+)/g;
+
+  let replacedText = text;
+  let productImageMatch;
+
+  while ((productImageMatch = productImageRegex.exec(text))) {
+
+    const productImage = productImageMatch[1];
+
+    const imgTag = `<img width="100" src="${productImage}" alt="" />`;
+
+    replacedText = replacedText.replace(productImageMatch[0], imgTag);
+  }
+
+  return replacedText;
+}
+
 
 const App = () => {
   const [ value, setValue ] = useState(null)
   const [ message, setMessage] = useState(null)
   const [ isSent, setIsSent] = useState(0)
-  const [ paramValue, setParamValue] = useState(null)
   const [ previousChats, setPreviousChats ] = useState([])
   const [ currentTitle, setCurrentTitle ] = useState(null)
+  const inputRef = useRef(null)
   const typingImageUrl = typingImage
   const createNewChat = () => {
     setMessage(null)
     setValue("")
-    setParamValue("")
     setCurrentTitle(null)
   }
 
   const handleClick = (uniqueTitle) => {
     setCurrentTitle(uniqueTitle)
     setMessage(null)
-    setValue("")
-    setParamValue("")
+    setValue("")    
   }
 
   const getMessages = async () => {
@@ -31,12 +56,12 @@ const App = () => {
 
 
     setIsSent(1)
-    setParamValue(value)
-    setValue("")
+    inputRef.current.value = "";
     const options = {
       method: "POST",
       body: JSON.stringify({
-        message: paramValue,
+        message: value,
+        previousChats: previousChats,
       }),
       headers: {
         "Content-Type": "application/json"
@@ -54,21 +79,21 @@ const App = () => {
   }
 
   useEffect(() => {
-    console.log(currentTitle, paramValue, message)
-    if (!currentTitle && paramValue && message){
-      setCurrentTitle(paramValue)
+    console.log(currentTitle, value, message)
+    if (!currentTitle && value && message){
+      setCurrentTitle(value)
     }
-    if(currentTitle && paramValue && message){
+    if(currentTitle && value && message){
       setPreviousChats(prevChats => (
         [...prevChats,
           {
             title: currentTitle,
-            role: "user",
-            content: paramValue
+            role: "User",
+            content: value
           },
           {
             title: currentTitle,
-            role: message.role,
+            role: "Assistant",
             content: message.content
           }
         ]
@@ -83,6 +108,20 @@ const App = () => {
  
   const uniqueTitles = Array.from(new Set(previousChats.map(previousChat => previousChat.title)))
 
+
+  function extractProducts(text) {
+    const productRegex = /Products name: (.+)\nProduct Image: (.+)/g
+    const products = []
+    let match
+  
+    while ((match = productRegex.exec(text)) !== null) {
+      const name = match[1]
+      const image = match[2]
+      products.push({ name, image })
+    }
+  
+    return products
+  }
   
 
   return (
@@ -99,21 +138,24 @@ const App = () => {
       <section className="main">
         {/* {!currentTitle && <h3>Welcome to Carpet One Stafford! How can I help you today?</h3>} */}
         <ul className="feed">
-          <li><p class="role">assistant</p><p>Welcome to Carpet One Stafford! How can I help you today?</p></li>
+          <li><p class="role">Assistant:</p><p>Welcome to Carpet One Stafford! How can I help you today?</p></li>
           {currentChat.map((chatMessage, index) => <li key={index}>
-            <p className="role">{chatMessage.role}</p>
-            <p>{chatMessage.content}</p>
+            <p className="role">{chatMessage.role}:</p>
+            {/* <p>{chatMessage.content}</p> */}
+            
+            {/* <ChatMessage message={chatMessage.content} /> */}
+            <pre dangerouslySetInnerHTML={{ __html: replaceProductInfoWithImages(chatMessage.content) }}></pre>
            </li>)}
 
             
-            {isSent == 1 && (<li><p className="role">user</p><p>{paramValue}</p></li>)}
-            {isSent == 1 && (<li className='assistant-wrapper'><p className="role">assistant</p><p className='loading-wrapper'><img className="typing-image" src={typingImageUrl} /></p></li>)}
+            {isSent == 1 && (<li><p className="role">User:</p><p>{value}</p></li>)}
+            {isSent == 1 && (<li className='assistant-wrapper'><p className="role">Assistant:</p><p className='loading-wrapper'><img className="typing-image" src={typingImageUrl} /></p></li>)}
             
         </ul>
         <div className="bottom-section">
           <div className="input-container">
 
-              <input  value={value} onChange={(e) => setValue(e.target.value)} />
+              <input ref={inputRef}  onChange={(e) => setValue(e.target.value)} />
               <div id="submit" onClick={getMessages}>Send</div>
           </div>
           <p className="info">
