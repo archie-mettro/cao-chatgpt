@@ -2,12 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import typingImage from './typing-texting.gif'
 
 
-const ChatMessage = ({ message }) => {
-  return (
-    <p style={{ whiteSpace: 'pre-line' }}>{replaceProductInfoWithImages(message)}</p>
-  )
-}
-
 function replaceProductInfoWithImages(text) {
   const productNameRegex = /Products Name: (.+)/g;
   const productImageRegex = /Product Image: (.+)/g;
@@ -36,6 +30,10 @@ const App = () => {
   const [ currentTitle, setCurrentTitle ] = useState(null)
   const inputRef = useRef(null)
   const typingImageUrl = typingImage
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  
+  const chatDisplayRef = useRef(null);
+
   const createNewChat = () => {
     setMessage(null)
     setValue("")
@@ -53,7 +51,11 @@ const App = () => {
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === ""){
       site_url = "http://localhost:8000"
     }
-
+    if (inputRef.current.value.trim() === '') {
+      return; // Prevent submission if input is empty or contains only whitespace
+    }
+    
+    setIsSubmitted(true);
 
     setIsSent(1)
     inputRef.current.value = "";
@@ -73,6 +75,7 @@ const App = () => {
       const data = await response.json()
       setMessage(data.choices[0].message)
       setIsSent(0)
+      setIsSubmitted(false);
     } catch (error) {
       console.error(error)
     }
@@ -80,6 +83,7 @@ const App = () => {
 
   useEffect(() => {
     console.log(currentTitle, value, message)
+    
     if (!currentTitle && value && message){
       setCurrentTitle(value)
     }
@@ -102,6 +106,14 @@ const App = () => {
 
 
   }, [message, currentTitle])
+
+
+
+  // Function to scroll down the chat display
+  // function scrollToBottom() {
+  //   console.log("SCROLLED!!!")
+  //   chatDisplayRef.current.scrollTop = chatDisplayRef.current.scrollHeight;
+  // }
 
 
   const currentChat = previousChats.filter(previousChat => previousChat.title === currentTitle)
@@ -137,7 +149,7 @@ const App = () => {
       </section>
       <section className="main">
         {/* {!currentTitle && <h3>Welcome to Carpet One Stafford! How can I help you today?</h3>} */}
-        <ul className="feed">
+        <ul className="feed" ref={chatDisplayRef}>
           <li><p class="role">Assistant:</p><p>Welcome to Carpet One Stafford! How can I help you today?</p></li>
           {currentChat.map((chatMessage, index) => <li key={index}>
             <p className="role">{chatMessage.role}:</p>
@@ -155,7 +167,7 @@ const App = () => {
         <div className="bottom-section">
           <div className="input-container">
 
-              <input ref={inputRef}  onChange={(e) => setValue(e.target.value)} />
+              <input disabled={isSubmitted} ref={inputRef}  onChange={(e) => setValue(e.target.value)} onKeyDown={(e) => (e.key == 'Enter')?getMessages():""} />
               <div id="submit" onClick={getMessages}>Send</div>
           </div>
           <p className="info">

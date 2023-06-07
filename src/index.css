@@ -114,6 +114,7 @@ input:focus{
   color: rgba(255,255,255, 0.8);
   font-size: 14px;
   text-align: left;
+  text-wrap: wrap;
 }
 
 .feed p.role{
